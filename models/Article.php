@@ -7,16 +7,16 @@ use Yii;
 /**
  * This is the model class for table "article".
  *
- * @property int $id
- * @property string $title
- * @property string $description
- * @property string $content
- * @property string $date
- * @property string $image
- * @property int $viewed
- * @property int $user_id
- * @property int $status
- * @property int $category_id
+ * @property int          $id
+ * @property string       $title
+ * @property string       $description
+ * @property string       $content
+ * @property string       $date
+ * @property string       $image
+ * @property int          $viewed
+ * @property int          $user_id
+ * @property int          $status
+ * @property int          $category_id
  *
  * @property ArticleTag[] $articleTags
  */
@@ -36,10 +36,11 @@ class Article extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['description', 'content'], 'string'],
-            [['date'], 'safe'],
-            [['viewed', 'user_id', 'status', 'category_id'], 'integer'],
-            [['title', 'image'], 'string', 'max' => 255],
+            [['title'], 'required'],
+            [['title', 'description', 'content'], 'string'],
+            [['date'], 'date', 'format' => 'php:Y-m-d'],
+            [['date'], 'default', 'value' => date('Y-m-d')],
+            [['title'], 'string', 'max' => 255],
         ];
     }
 
@@ -63,10 +64,33 @@ class Article extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @param $filename
+     *
+     * @return bool
      */
-    public function getArticleTags()
+    public function saveImage($filename)
     {
-        return $this->hasMany(ArticleTag::className(), ['article_id' => 'id']);
+        $this->image = $filename;
+
+        return $this->save(false);
     }
+
+    public function getImage()
+    {
+        return ($this->image) ? '/uploads/' . $this->image : 'no-image.png';
+    }
+  
+    public function deleteImage()
+    {
+        $imageUploadModel = new ImageUpload();
+        $imageUploadModel->deleteCurrentImage($this->image);
+    }
+
+    public function beforeDelete()
+    {
+        $this->deleteImage();
+        return parent::beforeDelete();
+    }
+
+
 }
