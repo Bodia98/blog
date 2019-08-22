@@ -22,6 +22,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'btn btn-default']) ?>
         <?= Html::a('Set Category', ['set-category', 'id' => $model->id],
             ['class' => 'btn btn-default']) ?>
+        <?= Html::a('Set Tag', ['set-tag', 'id' => $model->id],
+            ['class' => 'btn btn-default']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [

@@ -2,7 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\Article;
+use app\models\Category;
 use Yii;
+use yii\data\Pagination;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -61,7 +64,28 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $data       = Article::getAll();
+        $popular    = Article::getPopular();
+        $recent     = Article::getRecent();
+        $categories = Category::getAll();
+
+        return $this->render('index',[
+                'articles'    => $data['articles'],
+                'pagination'  => $data['pagination'],
+                'popular'     => $popular,
+                'recent'      => $recent,
+                'categories'  => $categories
+            ]);
+    }
+
+    public function actionView()
+    {
+        return $this->render('single');
+    }
+
+    public function actionCategory()
+    {
+        return $this->render('category');
     }
 
     /**
@@ -106,7 +130,9 @@ class SiteController extends Controller
     public function actionContact()
     {
         $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
+        if ($model->load(Yii::$app->request->post())
+            && $model->contact(Yii::$app->params['adminEmail'])
+        ) {
             Yii::$app->session->setFlash('contactFormSubmitted');
 
             return $this->refresh();

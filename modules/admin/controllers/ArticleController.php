@@ -4,6 +4,7 @@ namespace app\modules\admin\controllers;
 
 use app\models\Category;
 use app\models\ImageUpload;
+use app\models\Tag;
 use Yii;
 use app\models\Article;
 use app\models\ArticleSearch;
@@ -75,8 +76,7 @@ class ArticleController extends Controller
     {
         $model = new Article();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save())
-        {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -98,8 +98,7 @@ class ArticleController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save())
-        {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -137,8 +136,7 @@ class ArticleController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Article::findOne($id)) !== null)
-        {
+        if (($model = Article::findOne($id)) !== null) {
             return $model;
         }
 
@@ -154,30 +152,34 @@ class ArticleController extends Controller
     public function actionSetImage($id)
     {
         $model = new ImageUpload();
-        if (Yii::$app->request->isPost)
-        {
+        if (Yii::$app->request->isPost) {
 
             $article = $this->findModel($id);
             $file = UploadedFile::getInstance($model, 'image');
-            if ($article->saveImage($model->uploadFile($file, $article->image)))
-            {
+            if ($article->saveImage($model->uploadFile($file,
+                $article->image))
+            ) {
                 return $this->redirect(['view', 'id' => $article->id]);
             }
         }
         return $this->render('image', ['model' => $model]);
     }
 
+    /**
+     * @param $id
+     *
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
+     */
     public function actionSetCategory($id)
     {
         $article = $this->findModel($id);
         $selectedCategory = $article->category->id;
         $categories = ArrayHelper::map(Category::find()->all(), 'id', "title");
 
-        if(Yii::$app->request->isPost)
-        {
+        if (Yii::$app->request->isPost) {
             $category = Yii::$app->request->post('category');
-            if ($article->saveCategory($category))
-            {
+            if ($article->saveCategory($category)) {
                 return $this->redirect(['view', 'id' => $article->id]);
             }
         }
@@ -189,6 +191,26 @@ class ArticleController extends Controller
             'categories' => $categories,
         ]);
     }
+
+    public function actionSetTag($id)
+    {
+        $article = $this->findModel($id);
+        $selectedTags = $article->getSelectedTags(); //
+        $tags = ArrayHelper::map(Tag::find()->all(), 'id', 'title');
+
+
+        if (Yii::$app->request->isPost) {
+            $tags = Yii::$app->request->post('tags');
+            $article->saveTags($tags);
+            return $this->redirect(['view', 'id' => $article->id]);
+        }
+
+        return $this->render('tags', [
+            'selectedTags' => $selectedTags,
+            'tags' => $tags
+        ]);
+    }
+
 
 }
 

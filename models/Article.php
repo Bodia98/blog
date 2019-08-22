@@ -3,6 +3,9 @@
 namespace app\models;
 
 use Yii;
+use yii\data\Pagination;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "article".
@@ -18,9 +21,8 @@ use Yii;
  * @property int          $status
  * @property int          $category_id
  *
- * @property ArticleTag[] $articleTags
  */
-class Article extends \yii\db\ActiveRecord
+class Article extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -79,13 +81,17 @@ class Article extends \yii\db\ActiveRecord
     {
         return ($this->image) ? '/uploads/' . $this->image : 'no-image.png';
     }
-  
+
+
     public function deleteImage()
     {
         $imageUploadModel = new ImageUpload();
         $imageUploadModel->deleteCurrentImage($this->image);
     }
 
+    /**
+     * @return bool
+     */
     public function beforeDelete()
     {
         $this->deleteImage();
@@ -97,6 +103,11 @@ class Article extends \yii\db\ActiveRecord
         return $this->hasOne(Category::className(), ['id' => 'category_id']) ;
     }
 
+    /**
+     * @param $category_id
+     *
+     * @return bool
+     */
     public function saveCategory($category_id)
     {
         $category = Category::findOne($category_id);
@@ -107,5 +118,75 @@ class Article extends \yii\db\ActiveRecord
         }
     }
 
+    public function getTags()
+    {
+        return $this->hasMany(Tag::className(), ['id' => 'tag_id'])
+            ->viaTable('article_tag', ['article_id' => 'id']);
+    }
 
+    public function getSelectedTags()
+    {
+        $selectedIds = $this->getTags()->select('id')->asArray()->all();
+        return ArrayHelper::getColumn($selectedIds, 'id');
+    }
+
+
+    public function saveTags($tags)
+    {
+        if (is_array($tags))
+        {
+            $this->clearCurrentTags();
+            foreach($tags as $tag_id)
+            {
+                $tag = Tag::findOne($tag_id);
+                $this->link('tags', $tag);
+            }
+        }
+    }
+
+
+    public function clearCurrentTags()
+    {
+        ArticleTag::deleteAll(['article_id'=>$this->id]);
+    }
+
+    public function getDate()
+    {
+        return Yii::$app->formatter->asDate($this->date);
+    }
+
+    public static function getAll($pageSize = 8)
+    {
+        // build a DB query to get all articles
+        $query = Article::find();
+        // get the total number of articles(but do not fetch the article data yet)
+        $count = $query->count();
+        // create a pagination object with the total count
+        $pagination = new Pagination([
+            'totalCount' => $count,
+            'pageSize' => 8,
+            'pageSizeParam' => false,
+            'forcePageParam' => false
+        ]);
+        //limit the query using the pagination and retrieve the articles
+        $articles = $query->offset($pagination->offset)
+            ->limit($pagination->limit)
+            ->all();
+
+        $data['articles']    = $articles;
+        $data['pagination']  = $pagination;
+
+        return $data;
+    }
+
+    public static function getPopular()
+    {
+       return $popular = Article::find()->orderBy('viewed DESC')->limit(3)->all();
+    }
+
+    public static function getRecent()
+    {
+        return $recent = Article::find()->orderBy('date DESC')->limit(4)->all();
+    }
 }
+

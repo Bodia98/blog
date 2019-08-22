@@ -3,14 +3,18 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "category".
  *
- * @property int $id
- * @property string $title
+ * @property int                 $id
+ * @property ActiveQuery $articles
+ * @property mixed               $articlesCount
+ * @property string              $title
  */
-class Category extends \yii\db\ActiveRecord
+class Category extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -41,8 +45,21 @@ class Category extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getArticles()
     {
-        return $this->hasMany(Article::className(), ['category' => 'id']);
+        return $this->hasMany(Article::className(), ['category_id' => 'id']);
+    }
+
+    public function getArticlesCount()
+    {
+        return $this->getArticles()->count();
+    }
+
+    public static function getAll()
+    {
+        return $categories = Category::find()->all();
     }
 }
