@@ -3,10 +3,13 @@
 namespace app\controllers;
 
 use app\models\Article;
+use app\models\ArticleTag;
 use app\models\Category;
+use app\models\Tag;
 use Yii;
 use yii\data\Pagination;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -64,28 +67,51 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $data       = Article::getAll();
-        $popular    = Article::getPopular();
-        $recent     = Article::getRecent();
+        $data = Article::getAll();
+        $popular = Article::getPopular();
+        $recent = Article::getRecent();
         $categories = Category::getAll();
 
-        return $this->render('index',[
-                'articles'    => $data['articles'],
-                'pagination'  => $data['pagination'],
-                'popular'     => $popular,
-                'recent'      => $recent,
-                'categories'  => $categories
+        return $this->render('index', [
+            'articles' => $data['articles'],
+            'pagination' => $data['pagination'],
+            'popular' => $popular,
+            'recent' => $recent,
+            'categories' => $categories
+        ]);
+    }
+
+    public function actionView($id)
+    {
+        $article = Article::findOne($id);
+        $tags = ArrayHelper::map($article->tags, 'id', 'title');
+        $popular = Article::getPopular();
+        $recent = Article::getRecent();
+        $categories = Category::getAll();
+
+        return $this->render('single',[
+            'article' => $article,
+            'tags' => $tags,
+            'popular' => $popular,
+            'recent' => $recent,
+            'categories' => $categories
             ]);
     }
 
-    public function actionView()
+    public function actionCategory($id)
     {
-        return $this->render('single');
-    }
+        $data = Category::getArticlesByCategory($id);
+        $popular = Article::getPopular();
+        $recent = Article::getRecent();
+        $categories = Category::getAll();
 
-    public function actionCategory()
-    {
-        return $this->render('category');
+        return $this->render('category', [
+            'articles' => $data['articles'],
+            'pagination' => $data['pagination'],
+            'popular' => $popular,
+            'recent' => $recent,
+            'categories' => $categories
+        ]);
     }
 
     /**

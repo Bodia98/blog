@@ -111,7 +111,7 @@ class Article extends ActiveRecord
     public function saveCategory($category_id)
     {
         $category = Category::findOne($category_id);
-        if ($category != null)
+        if ($category !== null)
         {
             $this->link('category', $category);
             return true;
@@ -158,7 +158,7 @@ class Article extends ActiveRecord
     public static function getAll($pageSize = 8)
     {
         // build a DB query to get all articles
-        $query = Article::find();
+        $query = self::find();
         // get the total number of articles(but do not fetch the article data yet)
         $count = $query->count();
         // create a pagination object with the total count
@@ -181,12 +181,12 @@ class Article extends ActiveRecord
 
     public static function getPopular()
     {
-       return $popular = Article::find()->orderBy('viewed DESC')->limit(3)->all();
+        return self::find()->orderBy('viewed DESC')->limit(3)->all();
     }
 
     public static function getRecent()
     {
-        return $recent = Article::find()->orderBy('date DESC')->limit(4)->all();
+        return self::find()->orderBy('date DESC')->limit(4)->all();
     }
 }
 
