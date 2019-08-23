@@ -15,8 +15,14 @@
                             <?= $article->title ?>
                         </a>
                         <span class="p-date"><?= $article->getDate() ?></span>
-
+                        <ul class="text-center pull-right">
+                            <li>
+                                <a class="s-facebook" href="#"><i class="fa fa-eye"></i></a>
+                            </li>
+                            <?= (int)$article->viewed ?>
+                        </ul>
                     </div>
+
                 </div>
             <?php endforeach; ?>
         </aside>

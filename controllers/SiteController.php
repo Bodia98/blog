@@ -114,6 +114,16 @@ class SiteController extends Controller
         ]);
     }
 
+    public function actionTags()
+    {
+
+    }
+
+    
+    /*
+     https://yiiframework.com.ua/ru/doc/blog/comment.create/
+     */
+    
     /**
      * Login action.
      *
@@ -173,8 +183,5 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionAbout()
-    {
-        return $this->render('about');
-    }
+
 }

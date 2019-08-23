@@ -14,11 +14,12 @@ class ImageUpload extends Model
     /**
      * @return array
      */
+
     public function rules()
     {
         return [
             [['image'], 'required'],
-            [['image'], 'file', 'extensions' => 'jpg,png']
+            [['image'], 'file', 'extensions' => 'jpg, png, jpeg, gif, svg, ico']
         ];
     }
 

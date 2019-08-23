@@ -2,7 +2,7 @@
  use yii\helpers\Url;
  use yii\widgets\LinkPager;
 ?>
-<!--main content start-->
+<?php if (empty($data)) :?>
 <div class="main-content">
     <div class="container">
         <div class="row">
@@ -52,4 +52,6 @@
         </div>
     </div>
 </div>
-<!-- end main content-->
+<?php else :?>
+<div>Opps  this category is empty</div>
+<?php endif;?>
