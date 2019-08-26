@@ -80,7 +80,11 @@ class Article extends ActiveRecord
 
     public function getImage()
     {
+<<<<<<< HEAD
         return $this->image ? '/uploads/' . $this->image : 'no-image.png';
+=======
+        return ($this->image) ? '/uploads/' . $this->image : '/uploads/no-image.png';
+>>>>>>> 36e1be846829ebf78e37372de23fe291fc6e718b
     }
 
 

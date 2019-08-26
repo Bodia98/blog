@@ -142,6 +142,11 @@ use yii\helpers\Url;
                 <!--                        </div>-->
                 <!--                    </div>-->
                 <!--                </div>-->
+
+                <?php
+
+                ?>
+
                 <div class="bottom-comment"><!--bottom comment-->
                     <h4>3 comments</h4>
                     <div class="comment-img">

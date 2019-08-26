@@ -1,0 +1,293 @@
+diff --git a/controllers/SiteController.php b/controllers/SiteController.php
+index ad23899..9871501 100644
+--- a/controllers/SiteController.php
++++ b/controllers/SiteController.php
+@@ -113,6 +113,16 @@ class SiteController extends Controller
+         ]);
+     }
+ 
++    public function actionTags()
++    {
++
++    }
++
++    
++    /*
++     https://yiiframework.com.ua/ru/doc/blog/comment.create/
++     */
++    
+     /**
+      * Displays contact page.
+      *
+@@ -138,8 +148,5 @@ class SiteController extends Controller
+      *
+      * @return string
+      */
+-    public function actionAbout()
+-    {
+-        return $this->render('about');
+-    }
++
+ }
+diff --git a/models/Article.php b/models/Article.php
+index e85a0dd..c8a05a3 100644
+--- a/models/Article.php
++++ b/models/Article.php
+@@ -80,7 +80,11 @@ class Article extends ActiveRecord
+ 
+     public function getImage()
+     {
++<<<<<<< HEAD
+         return $this->image ? '/uploads/' . $this->image : 'no-image.png';
++=======
++        return ($this->image) ? '/uploads/' . $this->image : '/uploads/no-image.png';
++>>>>>>> a2ae47c80aa60ef150a85fc79984a11dc3ac4326
+     }
+ 
+ 
+diff --git a/models/Category.php b/models/Category.php
+index 6e16bd9..36c021e 100644
+--- a/models/Category.php
++++ b/models/Category.php
+@@ -67,7 +67,7 @@ class Category extends ActiveRecord
+     public static function getArticlesByCategory($id)
+     {
+         // build a DB query to get all articles
+-        $query = Article::find()->where(['category_id' => $id]);
++        $query = Article::find()->where(['category_id' => $id])->orderBy('id DESC');
+         // get the total number of articles(but do not fetch the article data yet)
+         $count = $query->count();
+         // create a pagination object with the total count
+diff --git a/models/ImageUpload.php b/models/ImageUpload.php
+index ae3c838..1059eae 100644
+--- a/models/ImageUpload.php
++++ b/models/ImageUpload.php
+@@ -14,11 +14,12 @@ class ImageUpload extends Model
+     /**
+      * @return array
+      */
++
+     public function rules()
+     {
+         return [
+             [['image'], 'required'],
+-            [['image'], 'file', 'extensions' => 'jpg,png']
++            [['image'], 'file', 'extensions' => 'jpg, png, jpeg, gif, svg, ico']
+         ];
+     }
+ 
+diff --git a/models/Tag.php b/models/Tag.php
+index 14d77a6..fd4eb89 100644
+--- a/models/Tag.php
++++ b/models/Tag.php
+@@ -3,6 +3,7 @@
+ namespace app\models;
+ 
+ use Yii;
++use yii\data\Pagination;
+ use yii\db\ActiveRecord;
+ 
+ /**
+@@ -49,4 +50,6 @@ class Tag extends ActiveRecord
+             ->viaTable('article_tag', ['tag_id' => 'id']);
+     }
+ 
++
++
+ }
+diff --git a/modules/admin/controllers/ArticleController.php b/modules/admin/controllers/ArticleController.php
+index c12318a..e018f44 100644
+--- a/modules/admin/controllers/ArticleController.php
++++ b/modules/admin/controllers/ArticleController.php
+@@ -174,7 +174,7 @@ class ArticleController extends Controller
+     public function actionSetCategory($id)
+     {
+         $article = $this->findModel($id);
+-        $selectedCategory = $article->category->id;
++        $selectedCategory = $article->id;
+         $categories = ArrayHelper::map(Category::find()->all(), 'id', "title");
+ 
+         if (Yii::$app->request->isPost) {
+diff --git a/modules/admin/views/default/index.php b/modules/admin/views/default/index.php
+index 6f35b82..e69de29 100644
+--- a/modules/admin/views/default/index.php
++++ b/modules/admin/views/default/index.php
+@@ -1,12 +0,0 @@
+-<div class="admin-default-index">
+-    <h1><?= $this->context->action->uniqueId ?></h1>
+-    <p>
+-        This is the view content for action "<?= $this->context->action->id ?>".
+-        The action belongs to the controller "<?= get_class($this->context) ?>"
+-        in the "<?= $this->context->module->id ?>" module.
+-    </p>
+-    <p>
+-        You may customize this page by editing the following file:<br>
+-        <code><?= __FILE__ ?></code>
+-    </p>
+-</div>
+diff --git a/views/partials/sidebar.php b/views/partials/sidebar.php
+index 4906c95..8e3f0d7 100644
+--- a/views/partials/sidebar.php
++++ b/views/partials/sidebar.php
+@@ -15,8 +15,14 @@
+                             <?= $article->title ?>
+                         </a>
+                         <span class="p-date"><?= $article->getDate() ?></span>
+-
++                        <ul class="text-center pull-right">
++                            <li>
++                                <a class="s-facebook" href="#"><i class="fa fa-eye"></i></a>
++                            </li>
++                            <?= (int)$article->viewed ?>
++                        </ul>
+                     </div>
++
+                 </div>
+             <?php endforeach; ?>
+         </aside>
+diff --git a/views/site/about.php b/views/site/about.php
+deleted file mode 100644
+index 68d5cf3..0000000
+--- a/views/site/about.php
++++ /dev/null
+@@ -1,18 +0,0 @@
+-<?php
+-
+-/* @var $this yii\web\View */
+-
+-use yii\helpers\Html;
+-
+-$this->title = 'About';
+-$this->params['breadcrumbs'][] = $this->title;
+-?>
+-<div class="site-about">
+-    <h1><?= Html::encode($this->title) ?></h1>
+-
+-    <p>
+-        This is the About page. You may modify the following file to customize its content:
+-    </p>
+-
+-    <code><?= __FILE__ ?></code>
+-</div>
+diff --git a/views/site/category.php b/views/site/category.php
+index c2bb6ea..58764c5 100644
+--- a/views/site/category.php
++++ b/views/site/category.php
+@@ -2,7 +2,7 @@
+  use yii\helpers\Url;
+  use yii\widgets\LinkPager;
+ ?>
+-<!--main content start-->
++<?php if (empty($data)) :?>
+ <div class="main-content">
+     <div class="container">
+         <div class="row">
+@@ -52,4 +52,6 @@
+         </div>
+     </div>
+ </div>
+-<!-- end main content-->
+\ No newline at end of file
++<?php else :?>
++<div>Opps  this category is empty</div>
++<?php endif;?>
+diff --git a/views/site/login.php b/views/site/login.php
+new file mode 100644
+index 0000000..7dcecea
+--- /dev/null
++++ b/views/site/login.php
+@@ -0,0 +1,42 @@
++<?php
++
++/* @var $this yii\web\View */
++/* @var $form yii\bootstrap\ActiveForm */
++/* @var $model app\models\LoginForm */
++
++use yii\helpers\Html;
++use yii\bootstrap\ActiveForm;
++
++$this->title = 'Login';
++$this->params['breadcrumbs'][] = $this->title;
++?>
++<div class="site-login">
++    <h1><?= Html::encode($this->title) ?></h1>
++
++    <p>Please fill out the following fields to login:</p>
++
++    <?php $form = ActiveForm::begin([
++        'id' => 'login-form',
++        'layout' => 'horizontal',
++        'fieldConfig' => [
++            'template' => "{label}\n<div class=\"col-lg-3\">{input}</div>\n<div class=\"col-lg-8\">{error}</div>",
++            'labelOptions' => ['class' => 'col-lg-1 control-label'],
++        ],
++    ]); ?>
++
++        <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
++
++        <?= $form->field($model, 'password')->passwordInput() ?>
++
++        <?= $form->field($model, 'rememberMe')->checkbox([
++            'template' => "<div class=\"col-lg-offset-1 col-lg-3\">{input} {label}</div>\n<div class=\"col-lg-8\">{error}</div>",
++        ]) ?>
++
++        <div class="form-group">
++            <div class="col-lg-offset-1 col-lg-11">
++                <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
++            </div>
++        </div>
++
++    <?php ActiveForm::end(); ?>
++</div>
+diff --git a/views/site/single.php b/views/site/single.php
+index 6fe90d6..40c4099 100644
+--- a/views/site/single.php
++++ b/views/site/single.php
+@@ -142,6 +142,11 @@ use yii\helpers\Url;
+                 <!--                        </div>-->
+                 <!--                    </div>-->
+                 <!--                </div>-->
++
++                <?php
++
++                ?>
++
+                 <div class="bottom-comment"><!--bottom comment-->
+                     <h4>3 comments</h4>
+                     <div class="comment-img">
+diff --git a/views/site/tag.php b/views/site/tag.php
+new file mode 100644
+index 0000000..d800886
+--- /dev/null
++++ b/views/site/tag.php
+@@ -0,0 +1 @@
++123
+\ No newline at end of file
+diff --git a/web/uploads/4fd9b79f5e14062a5bf719ee3dc56764.gif b/web/uploads/4fd9b79f5e14062a5bf719ee3dc56764.gif
+new file mode 100644
+index 0000000..f9dfa9c
+Binary files /dev/null and b/web/uploads/4fd9b79f5e14062a5bf719ee3dc56764.gif differ
+diff --git a/web/uploads/843dddf94c943a79ef0f816a0cb70e21.gif b/web/uploads/843dddf94c943a79ef0f816a0cb70e21.gif
+new file mode 100644
+index 0000000..a1530cb
+Binary files /dev/null and b/web/uploads/843dddf94c943a79ef0f816a0cb70e21.gif differ
+diff --git a/web/uploads/9ad36cbd75b75fa781a8d8558363dce4.gif b/web/uploads/9ad36cbd75b75fa781a8d8558363dce4.gif
+new file mode 100644
+index 0000000..1f853e0
+Binary files /dev/null and b/web/uploads/9ad36cbd75b75fa781a8d8558363dce4.gif differ
+diff --git a/web/uploads/b826a232c25a2428babc1bb093540461.png b/web/uploads/b826a232c25a2428babc1bb093540461.png
+new file mode 100644
+index 0000000..b5cc209
+Binary files /dev/null and b/web/uploads/b826a232c25a2428babc1bb093540461.png differ
+diff --git a/web/uploads/c9cd4ca22391733032646fe714611b18.jpeg b/web/uploads/c9cd4ca22391733032646fe714611b18.jpeg
+new file mode 100644
+index 0000000..cb7f43c
+Binary files /dev/null and b/web/uploads/c9cd4ca22391733032646fe714611b18.jpeg differ
+diff --git a/web/uploads/eceecced3bfd169b82362e901db6662f.png b/web/uploads/eceecced3bfd169b82362e901db6662f.png
+new file mode 100644
+index 0000000..0b062cf
+Binary files /dev/null and b/web/uploads/eceecced3bfd169b82362e901db6662f.png differ
+diff --git a/web/no-image.png b/web/uploads/no-image.png
+similarity index 100%
+rename from web/no-image.png
+rename to web/uploads/no-image.png
