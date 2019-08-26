@@ -44,7 +44,7 @@ use yii\widgets\LinkPager;
                             <div class="social-share">
                                 <span class="social-share-title pull-left text-capitalize">
                                     By
-                                    <a href="#">Rubel</a> On <?= $article->getDate(); ?>
+                                    <a href="#"></a> On <?= $article->getDate(); ?>
                                 </span>
                                 <ul class="text-center pull-right">
                                     <li>

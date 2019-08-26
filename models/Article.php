@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use phpDocumentor\Reflection\DocBlock\Tags\Author;
 use Yii;
 use yii\data\Pagination;
 use yii\db\ActiveRecord;
@@ -79,7 +80,7 @@ class Article extends ActiveRecord
 
     public function getImage()
     {
-        return ($this->image) ? '/uploads/' . $this->image : 'no-image.png';
+        return $this->image ? '/uploads/' . $this->image : 'no-image.png';
     }
 
 
@@ -150,6 +151,11 @@ class Article extends ActiveRecord
         ArticleTag::deleteAll(['article_id'=>$this->id]);
     }
 
+    public static function getAuthor()
+    {
+        return self::find()->where('user_id')->all();
+    }
+
     public function getDate()
     {
         return Yii::$app->formatter->asDate($this->date);
@@ -187,6 +193,12 @@ class Article extends ActiveRecord
     public static function getRecent()
     {
         return self::find()->orderBy('date DESC')->limit(4)->all();
+    }
+
+    public function saveArticle()
+    {
+        $this->user_id = Yii::$app->user->id;
+        return $this->save();
     }
 }
 
