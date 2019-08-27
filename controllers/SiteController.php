@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Article;
 use app\models\ArticleTag;
 use app\models\Category;
+use app\models\CommentForm;
 use app\models\Tag;
 use Yii;
 use yii\data\Pagination;
@@ -87,13 +88,17 @@ class SiteController extends Controller
         $popular = Article::getPopular();
         $recent = Article::getRecent();
         $categories = Category::getAll();
+        $comments = $article->getArticleComments();
+        $commentForm = new CommentForm();
 
         return $this->render('single',[
             'article' => $article,
             'tags' => $tags,
             'popular' => $popular,
             'recent' => $recent,
-            'categories' => $categories
+            'categories' => $categories,
+            'comments' => $comments,
+            'commentForm' => $commentForm,
             ]);
     }
 
@@ -118,35 +123,20 @@ class SiteController extends Controller
 
     }
 
-    
-    /*
-     https://yiiframework.com.ua/ru/doc/blog/comment.create/
-     */
-    
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
+    public function actionComment($id)
     {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post())
-            && $model->contact(Yii::$app->params['adminEmail'])
-        ) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
+        $model = new CommentForm();
 
-            return $this->refresh();
+        if (Yii::$app->request->isPost)
+        {
+            $model->load(Yii::$app->request->post());
+            if ($model->saveComment($id))
+            {
+                Yii::$app->getSession()->setFlash('comment', 'You comment will be added sonn!');
+                return $this->redirect(['site/view', 'id' => $id]);
+            }
         }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
 
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
+    }
 
 }

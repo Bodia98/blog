@@ -19,6 +19,10 @@ class Comment extends ActiveRecord
     /**
      * {@inheritdoc}
      */
+
+    const STATUS_ALLOW = 1;
+    const STATUS_DISALLOW = 0;
+    const
     public static function tableName()
     {
         return 'comment';
@@ -32,6 +36,8 @@ class Comment extends ActiveRecord
         return [
             [['user_id', 'article_id', 'status'], 'integer'],
             [['text'], 'string', 'max' => 255],
+            [['article_id'], 'exist', 'skipOnError' => true, 'targetClass' => Article::className(), 'targetAttribute' => ['article_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -47,5 +53,37 @@ class Comment extends ActiveRecord
             'article_id' => 'Article ID',
             'status' => 'Status',
         ];
+    }
+
+    public function getArticle()
+    {
+        return $this->hasOne(Article::className(), ['id' => 'article_id']);
+    }
+
+    public function getUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    public function getDate()
+    {
+        return Yii::$app->formatter->asDate($this->date);
+    }
+
+    public function isAllowed()
+    {
+        return $this->status;
+    }
+
+    public function allow()
+    {
+        $this->status = self::STATUS_ALLOW;
+        return $this->save(false);
+    }
+
+    public function disallow()
+    {
+        $this->status = self::STATUS_DISALLOW;
+        return $this->save(false);
     }
 }

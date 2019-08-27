@@ -80,14 +80,8 @@ class Article extends ActiveRecord
 
     public function getImage()
     {
-<<<<<<< HEAD
-        return $this->image ? '/uploads/' . $this->image : 'no-image.png';
-=======
         return ($this->image) ? '/uploads/' . $this->image : '/uploads/no-image.png';
->>>>>>> 36e1be846829ebf78e37372de23fe291fc6e718b
     }
-
-
     public function deleteImage()
     {
         $imageUploadModel = new ImageUpload();
@@ -203,6 +197,16 @@ class Article extends ActiveRecord
     {
         $this->user_id = Yii::$app->user->id;
         return $this->save();
+    }
+
+    public function getComments()
+    {
+        return $this->hasMany(Comment::className(), ['article_id' => 'id']);
+    }
+
+    public function getArticleComments()
+    {
+        return $this->getComments()->where(['status' => 1])->all();
     }
 }
 
